@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationShutdown } from '@nestjs/common';
 import {
   Consumer,
   ConsumerRunConfig,
@@ -7,15 +7,22 @@ import {
 } from 'kafkajs';
 
 @Injectable()
-export class ConsumerService {
+export class ConsumerService implements OnApplicationShutdown {
   private readonly kafka = new Kafka({
+    clientId: 'nestjs-kafka-consumer',
     brokers: ['localhost:9092'],
+    retry: {
+      initialRetryTime: 100,
+      retries: 8,
+    },
   });
 
   private readonly consumers: Consumer[] = [];
 
   async consume(topic: ConsumerSubscribeTopics, config: ConsumerRunConfig) {
-    const consumer = this.kafka.consumer({ groupId: 'nestjs-kafka' });
+    const consumer = this.kafka.consumer({
+      groupId: 'nestjs-kafka',
+    });
 
     await consumer.connect();
     await consumer.subscribe(topic);

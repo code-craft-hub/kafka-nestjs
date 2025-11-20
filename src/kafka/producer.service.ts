@@ -1,13 +1,20 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Kafka, Producer, ProducerRecord } from 'kafkajs';
+import {
+  Injectable,
+  OnModuleInit,
+  OnApplicationShutdown,
+} from '@nestjs/common';
+import { Kafka, Partitioners, Producer, ProducerRecord } from 'kafkajs';
 
 @Injectable()
-export class ProducerService implements OnModuleInit {
+export class ProducerService implements OnModuleInit, OnApplicationShutdown {
   private readonly kafka = new Kafka({
+    clientId: 'nestjs-kafka-producer',
     brokers: ['localhost:9092'],
   });
 
-  private readonly producer: Producer = this.kafka.producer();
+  private readonly producer: Producer = this.kafka.producer({
+    createPartitioner: Partitioners.DefaultPartitioner,
+  });
 
   async onModuleInit() {
     await this.producer.connect();
@@ -18,6 +25,6 @@ export class ProducerService implements OnModuleInit {
   }
 
   async onApplicationShutdown() {
-    await this.producer.disconnect()
+    await this.producer.disconnect();
   }
 }
