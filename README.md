@@ -38,3 +38,12 @@ nest g decorator (alias: d)
 
 
 nest g application (internal alias for app, but included for completeness)
+
+### Generate file in the same directory without test file
+parent folder where I want all generated files to live is kafka for instance.
+
+nest g <s | mo | cl> kafka/producer --flat --no-spec
+
+### Clear uncommited files and directories
+git stash
+git clean -fd
